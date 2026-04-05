@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_f2062684_0918_4582_86fe_c55ef2b4aef7_Output_Variables_requestMethod = String
+

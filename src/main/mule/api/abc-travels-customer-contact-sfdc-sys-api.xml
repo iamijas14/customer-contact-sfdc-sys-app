@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <flow name="abc-travels-customer-contact-sfdc-sys-api-main">
+        <http:listener path="${app.basePath}" config-ref="abc-travels-customer-contact-sfdc-sys-api-httpListenerConfig">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <ee:transform doc:name="correlationId, requestMethod, requestPath, logParams" doc:id="f9d61b20-0bd4-4948-9400-0b959fef3eac" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="correlationId" ><![CDATA[%dw 2.0
+output application/json
+---
+correlationId]]></ee:set-variable>
+				<ee:set-variable variableName="requestMethod" ><![CDATA[%dw 2.0
+output application/json
+---
+attributes.method]]></ee:set-variable>
+				<ee:set-variable variableName="requestPath" ><![CDATA[%dw 2.0
+output application/json
+---
+attributes.requestUri]]></ee:set-variable>
+				<ee:set-variable variableName="logParams" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"tracepoint": "API Request Entry",
+	"source": flow.name,
+	"message": "Request to System API to " ++ (attributes.method default "") ++ " " ++ (attributes.requestUri default ""),
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="LOG: Entry" doc:id="9dc4dc70-981b-4bce-a2cb-5ae096e71e10" name="info-logging-subflow"/>
+        <apikit:router config-ref="abc-travels-customer-contact-sfdc-sys-api-config" />
+		<ee:transform doc:name="logParams" doc:id="350d4048-f9fa-4e1b-95b5-b90e89c3721b">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="logParams"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"tracepoint": "API Request Exit",
+	"source": flow.name,
+	"message": "Respone sent from System API",
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="LOG: Exit" doc:id="6132c55d-743f-4105-a2f9-3442f28659f4" name="info-logging-subflow" />
+		<error-handler ref="global-error-handler">
+        </error-handler>
+    </flow>
+    <flow name="get:\contacts:abc-travels-customer-contact-sfdc-sys-api-config">
+        <flow-ref doc:name="get-contacts-subflow" doc:id="a574c273-4d12-4ff0-9fb0-5c30fea1beef" name="get-contacts-subflow"/>
+    </flow>
+    <flow name="get:\health:abc-travels-customer-contact-sfdc-sys-api-config">
+		<flow-ref doc:name="api-health-check-subflow" doc:id="515552f5-ea37-4ab6-8dab-91c0468d76ad" name="api-health-check-subflow"/>
+    </flow>
+</mule>

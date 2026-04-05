@@ -1,0 +1,4 @@
+SELECT Id, AccountId, FirstName, LastName, Birthdate, Email, MobilePhone, Department, LastModifiedDate
+FROM Contact
+WHERE LastModifiedDate > :lastModifiedDateTime
+ORDER BY LastModifiedDate DESC

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="global-error-handler" doc:id="af1542e6-2673-4004-a13d-cd702c73a1e7" >
+		<on-error-propagate type="APIKIT:BAD_REQUEST">
+			<set-variable value="#[400]" doc:name="httpStatus" doc:id="8d78e959-779d-4819-ab16-94b87b3c1998" variableName="httpStatus" />
+			<flow-ref doc:name="prepare-error-response-subflow" doc:id="c956e997-3798-479f-b52c-d71d6e5756d4" name="prepare-error-response-subflow"/>
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+			<set-variable value="#[404]" doc:name="httpStatus" doc:id="0f3c2322-de8e-496d-bfae-62a00b531b3e" variableName="httpStatus" />
+			<flow-ref doc:name="prepare-error-response-subflow" doc:id="7caf0db7-c364-4013-86a6-1788e72c9ec9" name="prepare-error-response-subflow" />
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+			<set-variable value="#[405]" doc:name="httpStatus" doc:id="0f8ae3af-1334-4e2d-87e7-a4400b3595bb" variableName="httpStatus" />
+			<flow-ref doc:name="prepare-error-response-subflow" doc:id="6c15f2d3-e392-4b21-9b1d-18b37ea2c49f" name="prepare-error-response-subflow" />
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+			<set-variable value="#[406]" doc:name="httpStatus" doc:id="a6831c40-8fd0-459a-a11b-5fe5d8d013ce" variableName="httpStatus" />
+			<flow-ref doc:name="prepare-error-response-subflow" doc:id="9117e611-4f08-4f17-b15a-12cac7538e6c" name="prepare-error-response-subflow" />
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+			<set-variable value="#[415]" doc:name="httpStatus" doc:id="08bf6d89-3148-4a6f-a737-e4882db2a8c7" variableName="httpStatus" />
+			<flow-ref doc:name="prepare-error-response-subflow" doc:id="a46956d4-fd5b-4b93-ae59-9be5d35b7e4c" name="prepare-error-response-subflow" />
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+			<set-variable value="#[501]" doc:name="httpStatus" doc:id="98e658bd-8550-426c-92c1-2f4be89fae1e" variableName="httpStatus" />
+			<flow-ref doc:name="prepare-error-response-subflow" doc:id="496444c5-07e8-45b6-90d9-f2f292a487b9" name="prepare-error-response-subflow" />
+            
+</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="807b66db-4138-4aa6-871f-4fb550902d72" type="ANY">
+			<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;(error.errorMessage.attributes.statusCode) default 500]" doc:name="httpStatus" doc:id="95201cec-0d21-41ce-b974-afde49b5cb65" variableName="httpStatus" />
+			<flow-ref doc:name="prepare-error-response-subflow" doc:id="20260424-c623-4510-883b-56974bcc3eb1" name="prepare-error-response-subflow" />
+		</on-error-propagate>
+	</error-handler>
+	<sub-flow name="prepare-error-response-subflow" doc:id="4d58619e-5fa6-4d04-ad00-d2c1da3f4c88" >
+		<ee:transform doc:name="compose error payload" doc:id="e5743b1c-970b-4251-b030-eb1e837da1fb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn = "everywhere"
+import modules::Error
+
+var errorResponse = Error::response(error)
+var errorMessage = Error::message(error)
+---
+if(!isEmpty(vars.error))
+vars.error
+else
+{
+	"errorType": errorResponse.error,
+	"statusCode": vars.httpStatus,
+	"errorMessage": errorMessage,
+	"extraDetails": if (!isEmpty(errorResponse.errorDetails)) (errorResponse.errorDetails)
+			else if (!isEmpty(error.errorMessage.payload)) (error.errorMessage.payload)
+			else error.detailedDescription
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<remove-variable doc:name="error" doc:id="be8c4925-e0e4-4fd1-8172-aae5de880313" variableName="error"/>
+		<ee:transform doc:name="logParams" doc:id="833409eb-1806-4335-a27a-33d4ad08d316" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="logParams" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"tracepoint": "Error Handler",
+	"source": flow.name,
+	"errorDetails": payload
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="LOG: ERROR" doc:id="8bc8bd6e-5ae5-4b34-9301-95b35a3e7b48" name="error-logging-subflow" />
+	</sub-flow>
+</mule>

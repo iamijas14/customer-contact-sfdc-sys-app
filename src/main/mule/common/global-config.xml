@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<http:listener-config name="abc-travels-customer-contact-sfdc-sys-api-httpListenerConfig">
+        <http:listener-connection host="${app.http.host}" port="${app.http.port}" readTimeout="${app.readTimeout}">
+			<reconnection >
+				<reconnect frequency="${app.reconnection.frequency-ms}" count="${app.reconnection.attempts}" />
+			</reconnection>
+		</http:listener-connection>
+    </http:listener-config>
+    <apikit:config name="abc-travels-customer-contact-sfdc-sys-api-config" api="resource::da9085ea-a5b2-43d2-b8ed-bf7804c3ebb0:abc-travels-customer-contact-sfdc-sys-api:1.0.0:raml:zip:abc-travels-customer-contact-sfdc-sys-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />	
+	<salesforce:sfdc-config name="salesforce_config" doc:name="Salesforce Config" doc:id="21f0d861-368b-4f9d-adbf-c14081b1e58e" >
+		<salesforce:basic-connection username="${sdfc.username}" password="${sdfc.password}" securityToken="${sdfc.securityToken}" url="${sdfc.url}" connectionTimeout="${connection.timeout}" connectionTimeoutUnit="MILLISECONDS">
+			<reconnection >
+				<reconnect frequency="${app.reconnection.frequency-ms}" count="${app.reconnection.attempts}" />
+			</reconnection>
+		</salesforce:basic-connection>
+	</salesforce:sfdc-config>
+	<email:smtp-config name="email_smtp_config" doc:name="Email SMTP" doc:id="bca6a647-a795-401e-98fd-2bf936d2e9f1" >
+		<email:smtp-connection host="smtp.gmail.com" user="ijas.mi2714@gmail.com" password="risx dfev ocep bqlc" timeoutUnit="MINUTES" connectionTimeout="2" readTimeout="2" writeTimeout="2">
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="6fc0de7f-6561-401d-9c96-76acd66dc2a3" file="properties/config.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="3db7517e-ae8e-479a-8174-1dd71afdd3d5" file="properties/config-${mule.env}.yaml" />
+	<api-gateway:autodiscovery apiId="${api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="d66ba4f0-1352-45ce-8325-4c0aa03f69cd" flowRef="abc-travels-customer-contact-sfdc-sys-api-main" />
+
+</mule>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<sub-flow name="get-contacts-subflow" doc:id="fd0b460c-ba8e-4df5-b518-f81ffae7c005" >
+		<ee:transform doc:name="logParams" doc:id="79c2a22a-04ef-48ca-b0d1-43758b8dd491">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="logParams"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"tracepoint": "Sub Flow Entry",
+	"source": flow.name,
+	"message": "Fetch customer contacts information from Salesforce system",
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="LOG: Entry" doc:id="215debc1-c581-4bac-b9da-d398e067dc91" name="info-logging-subflow" />
+		<set-variable value="#[attributes.queryParams.lastModifiedDateTime]" doc:name="lastModifiedDateTime" doc:id="6cb61dd9-231d-429c-998e-a251d17632f7" variableName="lastModifiedDateTime"/>
+		<until-successful maxRetries="${retry.count}" doc:name="Until Successful" doc:id="461b768a-4077-4165-a6ba-78dbff96dafe" millisBetweenRetries="${retry.frequency}">
+			<try doc:name="Try" doc:id="fb6c2c9d-f282-43cb-b622-5e65b2e38b27" >
+				<salesforce:query doc:name="fetch sfdc contact records" doc:id="90c18be9-4ca9-4e11-b67e-0e37efc38073" config-ref="salesforce_config" readTimeout="${app.readTimeout}">
+			<non-repeatable-iterable />
+			<salesforce:salesforce-query><![CDATA[#[readUrl('classpath://soql/contacts.soql', 'text/plain')]]]></salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[{
+	"lastModifiedDateTime": vars.lastModifiedDateTime
+}]]]></salesforce:parameters>
+		</salesforce:query>
+				<error-handler >
+					<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e7160140-13dd-4bd8-857c-fd6f50ca66a5" type="SALESFORCE:CONNECTIVITY, SALESFORCE:TIMEOUT">
+						<ee:transform doc:name="error" doc:id="6415a851-7cac-44cb-aaab-23a43c043395" >
+							<ee:message >
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable resource="dwl/error/error_response.dwl" variableName="error" />
+							</ee:variables>
+						</ee:transform>
+					</on-error-propagate>
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="56a0783a-d53b-45d3-9881-3812ae764e74" type="ANY">
+						<ee:transform doc:name="httpStatus" doc:id="11bf25f8-9fb1-49d6-b5a5-5c4817c61842">
+							<ee:message>
+							</ee:message>
+							<ee:variables>
+								<ee:set-variable resource="dwl/error/error_status_code.dwl" variableName="httpStatus" />
+							</ee:variables>
+						</ee:transform>
+						<flow-ref doc:name="prepare-error-response-subflow" doc:id="aae31cb0-abcc-48d0-ba5e-6f906d4fffd9" name="prepare-error-response-subflow" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</until-successful>
+		<ee:transform doc:name="logParams" doc:id="3a6785be-e2de-4ae1-a386-68dcf0606711" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="logParams" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"tracepoint": "Sub Flow Exit",
+	"source": flow.name
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="LOG: Exit" doc:id="3ec2207e-37e9-49da-9d2f-ee3ef1adb0a4" name="info-logging-subflow" />
+	</sub-flow>
+	<sub-flow name="send-email-subflow" doc:id="892e0ee0-8388-4f0b-a2c1-4230d772f30a" >
+		<parse-template doc:name="Parse Template" doc:id="f1a30d81-06a6-4af3-b090-6471e9349c46" location="email-template.html">
+		</parse-template>
+		<email:send doc:name="Send" doc:id="de8814f6-136f-40ce-9885-6277a0c888da" fromAddress="ijas.mi2714@gamil.com" subject="Salesforce Contact Update Notification" toAddresses="#[[vars.contact.Email]]" config-ref="email_smtp_config">
+			<email:body contentType="text/html" />
+		</email:send>
+	</sub-flow>
+</mule>

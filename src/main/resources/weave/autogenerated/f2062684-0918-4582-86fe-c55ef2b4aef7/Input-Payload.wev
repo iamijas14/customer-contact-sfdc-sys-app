@@ -1,0 +1,12 @@
+%dw 2.0
+
+type auto_f2062684_0918_4582_86fe_c55ef2b4aef7_Input_Payload = {|
+  status: String, 
+  version: String, 
+  environment: String, 
+  correlationId: String, 
+  application: String, 
+  timestamp: String
+|} {"mediaType": "application/json",
+"encoding": "UTF-8"}
+

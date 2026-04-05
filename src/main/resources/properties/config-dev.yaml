@@ -1,0 +1,6 @@
+#Salesforce config
+sdfc:
+  username: "dummy"
+  password: "dummy"
+  securityToken: "dummy"
+  url: "https://login.salesforce.com/services/Soap/u/64.0"

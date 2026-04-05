@@ -1,0 +1,26 @@
+api:
+  id: '20832298'
+
+app:
+  basePath: "/api/v1/*"
+  readTimeout: "90000"
+  reconnection:
+    frequency-ms: "2000"
+    attempts: "2"
+  http:
+    host: "0.0.0.0"
+    port: "8081"
+  https:
+    host: "0.0.0.0"
+    port: "8081"
+
+connection:
+  timeout: "60000"
+response:
+  timeout: "60000"
+
+retry:
+  count: "3"
+  frequency: "5000"
+
+timezone: "UTC"

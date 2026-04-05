@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_cc641ec9_cfcf_40c8_90ce_3f35ab7cd3fd_Input_Variables_correlationId = String
+
