@@ -60,7 +60,7 @@ else
 	"errorMessage": errorMessage,
 	"extraDetails": if (!isEmpty(errorResponse.errorDetails)) (errorResponse.errorDetails)
 			else if (!isEmpty(error.errorMessage.payload)) (error.errorMessage.payload)
-			else error.detailedDescription
+			else null
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
