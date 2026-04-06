@@ -53,12 +53,6 @@
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
-			<groupId>org.mule.connectors</groupId>
-			<artifactId>mule-email-connector</artifactId>
-			<version>1.8.0</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
 			<groupId>da9085ea-a5b2-43d2-b8ed-bf7804c3ebb0</groupId>
 			<artifactId>abc-travels-customer-contact-sfdc-sys-api</artifactId>
 			<version>1.0.0</version>

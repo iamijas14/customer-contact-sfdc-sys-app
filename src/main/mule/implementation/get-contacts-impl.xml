@@ -70,11 +70,4 @@ output application/json
 		</ee:transform>
 		<flow-ref doc:name="LOG: Exit" doc:id="3ec2207e-37e9-49da-9d2f-ee3ef1adb0a4" name="info-logging-subflow" />
 	</sub-flow>
-	<sub-flow name="send-email-subflow" doc:id="892e0ee0-8388-4f0b-a2c1-4230d772f30a" >
-		<parse-template doc:name="Parse Template" doc:id="f1a30d81-06a6-4af3-b090-6471e9349c46" location="email-template.html">
-		</parse-template>
-		<email:send doc:name="Send" doc:id="de8814f6-136f-40ce-9885-6277a0c888da" fromAddress="ijas.mi2714@gamil.com" subject="Salesforce Contact Update Notification" toAddresses="#[[vars.contact.Email]]" config-ref="email_smtp_config">
-			<email:body contentType="text/html" />
-		</email:send>
-	</sub-flow>
 </mule>
