@@ -56,6 +56,14 @@ output application/json
 				</error-handler>
 			</try>
 		</until-successful>
+		<ee:transform doc:name="payload" doc:id="e3d37d75-5acb-4f6f-94c8-0eaa5836dd7b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 		<ee:transform doc:name="logParams" doc:id="3a6785be-e2de-4ae1-a386-68dcf0606711" >
 			<ee:message />
 			<ee:variables >
