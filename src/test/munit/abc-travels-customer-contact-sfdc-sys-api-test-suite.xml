@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="abc-travels-customer-contact-sfdc-sys-api-test-suite.xml" />
+	<munit:test name="contact-sfdc-sys-api-main-flow-test" doc:id="3fa2088e-e085-4416-8f50-eda45f759288" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="mock apikit router" doc:id="1f6d1a81-beb7-4396-9557-8b508c0dceb5" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="abc-travels-customer-contact-sfdc-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to abc-travels-customer-contact-sfdc-sys-api-main" doc:id="43e4dc1e-a788-4a80-ad63-9973de652327" name="abc-travels-customer-contact-sfdc-sys-api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Exit" doc:id="f744a3da-e188-4366-98fb-d0a37be6f2ed" processor="flow-ref" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="6132c55d-743f-4105-a2f9-3442f28659f4" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="contact-sfdc-sys-api-main-flow-bad-request-test" doc:id="31a4d9ca-b3ae-4a2a-8b22-8ed23bc9bb24" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="mock apikit router" doc:id="565e5216-26fe-4c14-bcfa-53db2164a766" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="abc-travels-customer-contact-sfdc-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<try doc:name="Try" doc:id="5c661ec4-7313-4184-8ecc-6195e941f808" >
+				<flow-ref doc:name="Flow-ref to abc-travels-customer-contact-sfdc-sys-api-main" doc:id="bcc5eb19-68c3-4057-8e01-6a4ebf6c122d" name="abc-travels-customer-contact-sfdc-sys-api-main" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="25969295-8de9-417d-a4a6-f1f644d57e53" >
+						<logger level="INFO" doc:name="Exception" doc:id="6bfbe662-23fc-4305-a1b1-1a460b7dbe55" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="assert bad request error" doc:id="a0270b32-156e-4076-bc44-3685f254fa90" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import error::apikit::test::assert_bad_request_expresseion_payload
+---
+assert_bad_request_expresseion_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="contact-sfdc-sys-api-main-flow-not-found-test" doc:id="5862b055-38ec-4894-9b55-8f4ef082046e" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="mock apikit router" doc:id="d14a8126-4807-4aa4-b41e-711050a6d3aa" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="abc-travels-customer-contact-sfdc-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<try doc:name="Try" doc:id="f1a91277-3747-4940-b653-f66cd6d84ce7" >
+				<flow-ref doc:name="Flow-ref to abc-travels-customer-contact-sfdc-sys-api-main" doc:id="139a615e-1d42-4a15-ad5a-2e14e5d48b04" name="abc-travels-customer-contact-sfdc-sys-api-main" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="41356723-9455-4a55-b965-66213bfeacf2" >
+						<logger level="INFO" doc:name="Exception" doc:id="7ddb8436-b7ff-4b6c-adfe-3e01df5664d3" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="assert bad request error" doc:id="928b11d7-a9e8-49dc-b39a-4b6b291e65a9" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import error::apikit::test::assert_not_found_expresseion_payload
+---
+assert_not_found_expresseion_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="contact-sfdc-sys-api-main-flow-method-not-allowed-test" doc:id="5c5a08e2-75e9-4630-8f2a-8b2fecaed708" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="mock apikit router" doc:id="aadf1d91-a2a0-43a1-a251-75043117ebaa" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="abc-travels-customer-contact-sfdc-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<try doc:name="Try" doc:id="2f3339df-0e62-42ff-bbdf-12b977145626" >
+				<flow-ref doc:name="Flow-ref to abc-travels-customer-contact-sfdc-sys-api-main" doc:id="a088f70b-9a26-4aac-9848-1f8c62017f31" name="abc-travels-customer-contact-sfdc-sys-api-main" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="eeeda1bc-fc31-4dbe-8e85-47f6f97a02dc" >
+						<logger level="INFO" doc:name="Exception" doc:id="e181d00a-0168-404f-b3b6-70b1d3141107" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="assert bad request error" doc:id="51623e3f-bdec-491b-b690-43b596618d66" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import error::apikit::test::assert_method_not_allowed_expresseion_payload
+---
+assert_method_not_allowed_expresseion_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="contact-sfdc-sys-api-main-flow-not-acceptable-test" doc:id="47b19ff3-6404-4d9d-a547-a3d21623bbd9" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="mock apikit router" doc:id="cd3586e0-fcfe-40ed-89af-33a40d6a6cd2" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="abc-travels-customer-contact-sfdc-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_ACCEPTABLE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<try doc:name="Try" doc:id="9c5ed892-84e8-4c2d-ab21-e18473953081" >
+				<flow-ref doc:name="Flow-ref to abc-travels-customer-contact-sfdc-sys-api-main" doc:id="eb122b93-17e8-492e-8d1d-0c3d7f75239f" name="abc-travels-customer-contact-sfdc-sys-api-main" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="0df28e10-4f85-4e3d-89e4-d94777f5dca5" >
+						<logger level="INFO" doc:name="Exception" doc:id="afceca0f-fd81-49ec-8419-a61075739cbb" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="assert bad request error" doc:id="0e4bb2cf-ada5-4254-8665-ddfa79c100c4" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import error::apikit::test::assert_not_acceptable_expresseion_payload
+---
+assert_not_acceptable_expresseion_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="contact-sfdc-sys-api-main-flow-unsupported-mediatype-test" doc:id="b10893e6-be55-4488-929e-1d7ff8523310" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="mock apikit router" doc:id="d769ba62-de20-44a4-ad33-9a0cf24988f5" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="abc-travels-customer-contact-sfdc-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<try doc:name="Try" doc:id="cc187639-8bc3-422f-8e1a-7e705e8a1e63" >
+				<flow-ref doc:name="Flow-ref to abc-travels-customer-contact-sfdc-sys-api-main" doc:id="c4c06943-52e0-4568-aea0-7bc221ce095b" name="abc-travels-customer-contact-sfdc-sys-api-main" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="39b9d3fb-62cd-425a-957e-fd689a77c4e9" >
+						<logger level="INFO" doc:name="Exception" doc:id="19b702f7-976b-4952-bab1-9b136ee4362a" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="assert bad request error" doc:id="8a2f34cc-752f-4241-9c9d-4f7f7522eec6" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import error::apikit::test::assert_unsupported_mediatype_expresseion_payload
+---
+assert_unsupported_mediatype_expresseion_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="contact-sfdc-sys-api-main-flow-not-implemented-test" doc:id="a1d700d1-7ec9-446f-9f5d-ecb0b22fc87b" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="mock apikit router" doc:id="ef354a16-bb80-4f0c-bb8d-00908d5b10fc" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="abc-travels-customer-contact-sfdc-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_IMPLEMENTED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<try doc:name="Try" doc:id="a5921dec-e429-4610-9c3b-51fba9e7e476" >
+				<flow-ref doc:name="Flow-ref to abc-travels-customer-contact-sfdc-sys-api-main" doc:id="75444e93-d802-4931-9b70-53632f878936" name="abc-travels-customer-contact-sfdc-sys-api-main" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="0122d413-010c-414a-8d5f-58926f0d2885" >
+						<logger level="INFO" doc:name="Exception" doc:id="c5396335-6ae3-4a79-bbf6-de3872536645" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="assert bad request error" doc:id="22fe11f5-7e2c-4d15-96f9-caef288abc34" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import error::apikit::test::assert_not_implemented_expresseion_payload
+---
+assert_not_implemented_expresseion_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="contact-sfdc-sys-api-main-flow-any-test" doc:id="5b240380-7a43-4b7a-9f65-da7bdf6515a1" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="mock apikit router" doc:id="ae599c8a-835a-4fe8-a869-3a8065cce5bd" processor="apikit:router" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="abc-travels-customer-contact-sfdc-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="EXPRESSION" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<try doc:name="Try" doc:id="016db2d3-7ed2-4e34-a6c4-35bd78a00c8c" >
+				<flow-ref doc:name="Flow-ref to abc-travels-customer-contact-sfdc-sys-api-main" doc:id="5dbb8900-0bce-40b7-934a-b1f50f2fa758" name="abc-travels-customer-contact-sfdc-sys-api-main" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="66652d09-0fd2-495a-a7a4-0601bedf15d5" >
+						<logger level="INFO" doc:name="Exception" doc:id="f6e4b722-5240-43ef-bf76-dbcd7eb6f066" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="assert bad request error" doc:id="f1806193-34ae-41a8-8089-4d70d390b6d2" >
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import error::apikit::test::assert_any_expresseion_payload
+---
+assert_any_expresseion_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

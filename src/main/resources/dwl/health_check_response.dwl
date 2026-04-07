@@ -7,6 +7,6 @@ output application/json
     "correlationId": correlationId,
   	"environment": Mule::p('mule.env'),
 	"applicationName": Mule::p('app.name') default "N/A",
-	"version": "1.0.0",
+	"version": "1.0.4",
 	"description": "Health check for ABC Travels System Application"
 }

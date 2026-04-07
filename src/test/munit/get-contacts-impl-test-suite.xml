@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="get-contacts-impl-test-suite.xml" />
+	<munit:test name="get-contacts-subflow-test" doc:id="b841556b-0c56-4806-aaaa-cdcdc2af1777" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="mock salesforce" doc:id="ba91f103-f791-4a37-8c18-563e053d4a2d" processor="salesforce:query">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="90c18be9-4ca9-4e11-b67e-0e37efc38073" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[%dw 2.0&#10;output application/json&#10;---&#10;readUrl('classpath:///sys/salesforce_contact_response.dwl')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="set lastModifiedDateTime" doc:id="bc21ae54-540a-4c1e-a901-a163f66ef55d" >
+				<munit:attributes value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	queryParams: {&#10;		lastModifiedDateTime: "2026-04-02T16:11:34.000Z"&#10;	}&#10;}]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to get:\contacts" doc:id="04501fcc-ccf1-4186-9fba-7fe1b9655752" name="get:\contacts:abc-travels-customer-contact-sfdc-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Exit" doc:id="fcb67486-1408-4776-97ce-7ce4eec1a1ae" processor="flow-ref" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3ec2207e-37e9-49da-9d2f-ee3ef1adb0a4" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get-contacts-subflow-retry-error-test" doc:id="fa7ac553-44a7-4e68-be73-db03b4cba519" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="mock salesforce" doc:id="af735147-48bc-4122-ac4b-43e47f05fe3d" processor="salesforce:query" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="90c18be9-4ca9-4e11-b67e-0e37efc38073" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="set lastModifiedDateTime" doc:id="b4d6df79-fd37-4ce6-b1c0-121e3886573e" >
+				<munit:attributes value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	queryParams: {&#10;		lastModifiedDateTime: "2026-04-02T16:11:34.000Z"&#10;	}&#10;}]' />
+			</munit:set-event>
+			<try doc:name="Try" doc:id="72fe0655-8b46-433e-8115-45a64072fd64" >
+				<flow-ref doc:name="Flow-ref to get:\contacts" doc:id="b97c9f17-3be3-4c1e-96ed-2236eddc3791" name="get:\contacts:abc-travels-customer-contact-sfdc-sys-api-config" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="2b81a535-1943-4fde-a462-38842c1a1b79" >
+						<logger level="INFO" doc:name="Exception" doc:id="97a65f45-e369-480d-8dec-a8094ca82723" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="get-contacts-subflow-non-retry-error-test" doc:id="e08b6040-9d16-49f0-842a-99a0492baf77" description="Test" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="mock salesforce" doc:id="2bc1426d-6a21-48e2-8de3-09d253bbb3d7" processor="salesforce:query" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="90c18be9-4ca9-4e11-b67e-0e37efc38073" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="set lastModifiedDateTime" doc:id="36be1ebc-1ce9-43a9-9be4-7d46b8fa7dbb" >
+				<munit:attributes value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	queryParams: {&#10;		lastModifiedDateTime: "2026-04-02T16:11:34.000Z"&#10;	}&#10;}]' />
+			</munit:set-event>
+			<try doc:name="Try" doc:id="54c06a54-94cc-48e2-8137-649afec2589a" >
+				<flow-ref doc:name="Flow-ref to get:\contacts" doc:id="a2aa89df-7a1d-4277-8657-98d70729f0ef" name="get:\contacts:abc-travels-customer-contact-sfdc-sys-api-config" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="61a9ce0f-c8dc-4dda-8837-4e7842400cb9" >
+						<logger level="INFO" doc:name="Exception" doc:id="f1b9f364-5d7b-410a-b50f-5eecd6437392" />
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Non retry error" doc:id="96143026-e026-4ec1-9db2-144aa46c5271" processor="flow-ref" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="8bc8bd6e-5ae5-4b34-9301-95b35a3e7b48" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
