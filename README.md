@@ -39,4 +39,4 @@ GET /api/v1/contacts
 - Error handling with global handler
 
 ## 🚀 Deployment
-- CloudHub
+- CloudHub 2.0
