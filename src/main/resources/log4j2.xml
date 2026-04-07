@@ -14,7 +14,7 @@
         </RollingFile>
 
         <Socket name="logstash"
-                host=""
+                host="localhost"
                 port="5000"
                 protocol="TCP"
                 immediateFail="false"
