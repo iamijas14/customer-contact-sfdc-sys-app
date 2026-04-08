@@ -20,12 +20,12 @@ http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/m
     </http:listener-config>
     <apikit:config name="abc-travels-customer-contact-sfdc-sys-api-config" api="resource::da9085ea-a5b2-43d2-b8ed-bf7804c3ebb0:abc-travels-customer-contact-sfdc-sys-api:1.0.0:raml:zip:abc-travels-customer-contact-sfdc-sys-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />	
 	<salesforce:sfdc-config name="salesforce_config" doc:name="Salesforce Config" doc:id="21f0d861-368b-4f9d-adbf-c14081b1e58e" >
-		<salesforce:basic-connection username="${sdfc.username}" password="${sdfc.password}" securityToken="${sdfc.securityToken}" url="${sdfc.url}" connectionTimeout="${connection.timeout}" connectionTimeoutUnit="MILLISECONDS">
-			<reconnection >
-				<reconnect frequency="${app.reconnection.frequency-ms}" count="${app.reconnection.attempts}" />
-			</reconnection>
-		</salesforce:basic-connection>
-	</salesforce:sfdc-config>
+		<salesforce:config-with-oauth-connection >
+			<salesforce:oauth-authorization-code consumerKey="${sdfc.clientId}" consumerSecret="${sdfc.clientSecret}" accessTokenUrl="${sdfc.accessTokenUrl}" authorizationUrl="${sdfc.authorizeUrl}"/>
+			<salesforce:oauth-callback-config listenerConfig="abc-travels-customer-contact-sfdc-sys-api-httpListenerConfig" callbackPath="${sdfc.callbackPath}" authorizePath="${sdfc.authorizePath}" externalCallbackUrl="${sdfc.externalUrl}" />
+		</salesforce:config-with-oauth-connection>
+	
+</salesforce:sfdc-config>
 	<configuration-properties doc:name="Configuration properties" doc:id="6fc0de7f-6561-401d-9c96-76acd66dc2a3" file="properties/config.yaml" />
 	<configuration-properties doc:name="Configuration properties" doc:id="3db7517e-ae8e-479a-8174-1dd71afdd3d5" file="properties/config-${mule.env}.yaml" />
 	<api-gateway:autodiscovery apiId="${api.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="d66ba4f0-1352-45ce-8325-4c0aa03f69cd" flowRef="abc-travels-customer-contact-sfdc-sys-api-main" />
